@@ -1,0 +1,64 @@
+@layout('layouts.app')
+
+@section('content')
+    <div class="container mx-auto">
+        <div class="flex flex-wrap">
+            <div class="w-full md:w-3/4 mx-auto">
+                <div class="bg-white shadow rounded-lg ">
+                    <div class="text-3xl py-2 px-4 rounded-t border border-greys bg-grey-lightest">Register</div>
+
+                    <div class="py-2 px-4">
+                        <form method="POST" action="/register">
+                            <input type="hidden" name="_csrf" value="{{ csrf }}">
+
+                            <!-- Name -->
+                            <div class="mb-4">
+                                <label class="block text-grey-darker text-sm font-bold mb-2">Name</label>
+
+                                <input type="text" class="appearance-none block w-full bg-grey-lightest text-grey-darker border border-grey-lighter rounded py-3 px-4" name="name" autofocus>
+                            </div>
+
+                            <!-- E-Mail Address -->
+                            <div class="mb-4">
+                                <label class="block text-grey-darker text-sm font-bold mb-2">E-Mail Address</label>
+
+                                <input type="email" class="appearance-none block w-full bg-grey-lightest text-grey-darker border border-grey-lighter rounded py-3 px-4" name="email">
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-4">
+                                <label class="block text-grey-darker text-sm font-bold mb-2">Password</label>
+
+                                <input type="password" class="appearance-none block w-full bg-grey-lightest text-grey-darker border border-grey-lighter rounded py-3 px-4" name="password">
+                            </div>
+
+                            <!-- Password Confirmation -->
+                            <div class="mb-4">
+                                <label class="block text-grey-darker text-sm font-bold mb-2">Confirm Password</label>
+
+                                <input type="password" class="appearance-none block w-full bg-grey-lightest text-grey-darker border border-grey-lighter rounded py-3 px-4" name="password_confirmation">
+                            </div>
+
+                            <!-- Terms And Conditions -->
+                            <div class="flex flex-wrap">
+
+                                <div class="w-full mb-3">
+                                    <div class="checkbox">
+                                        <label class="hover:cursor-pointer flex vertical-center align-middle items-center">
+                                            <input class="hover:cursor-pointer" type="checkbox" name="terms"> &nbsp;
+                                            I Accept The <a href="/terms" target="_blank">Terms Of Service</a>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button class="w-full inline-block text-sm px-4 py-2 leading-none rounded mt-4 mb-4 lg:mt-0 border border-grey text-black hover:border-blue hover:bg-blue hover:text-white" type="submit">
+                                    <i class="fa fa-btn fa-check-circle"></i> Register
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection

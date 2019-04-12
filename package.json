@@ -1,0 +1,47 @@
+{
+  "private": true,
+  "engines": {
+    "node": ">=9.6"
+  },
+  "scripts": {
+    "hot-fe": "cross-env NODE_ENV=development webpack-dev-server --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "dev-fe": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "hot": "nodemon app.js",
+    "test": "./node_modules/.bin/_mocha './tests/**/*Test.js'",
+    "local-coverage": "./node_modules/.bin/nyc --reporter=html npm test",
+    "test-coverage": "./node_modules/.bin/nyc --reporter=html npm test && ./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls"
+  },
+  "dependencies": {
+    "bcrypt": "^3.0.5",
+    "body-parser": "^1.18.3",
+    "bookshelf": "^0.14.2",
+    "bookshelf-eloquent": "^0.1.15",
+    "bookshelf-scopes": "^1.5.1",
+    "cookie-parser": "^1.4.4",
+    "csurf": "^1.9.0",
+    "dotenv": "^7.0.0",
+    "edge.js": "^1.1.4",
+    "express-session": "^1.15.6",
+    "fringejs": "^0.1.0",
+    "indicative": "^5.0.8",
+    "knex": "0.13",
+    "laravel-mix": "^4.0.15",
+    "mysql": "^2.16.0",
+    "pluralize": "^7.0.0",
+    "rate-limiter-flexible": "^0.23.5"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.0",
+    "mocha": "^5.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nyc": "^13.1.0",
+    "proxyquire": "^2.1.0",
+    "sass": "^1.17.4",
+    "sass-loader": "7.*",
+    "sinon": "^7.0.0",
+    "supertest": "^4.0.2",
+    "tailwindcss": "^0.7.4",
+    "vue-template-compiler": "^2.6.10"
+  }
+}
