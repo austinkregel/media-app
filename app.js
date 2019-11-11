@@ -26,15 +26,4 @@ app.close = () => {
     app.closeActions.map(closure => closure());
 }
 
-
 process.stdin.resume()
-
-function exitHandler(options, exitCode) {
-    app.close();
-    process.exit();
-}
-
-process.on('exit', exitHandler);
-process.on('SIGINT', exitHandler);
-process.on('SIGUSR1', exitHandler);
-process.on('SIGUSR2', exitHandler);

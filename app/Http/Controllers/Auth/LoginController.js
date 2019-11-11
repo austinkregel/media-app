@@ -1,4 +1,4 @@
-const User = app.make(app.base_path('app/User'));
+const User = app.require('app/User');
 const bcrypt = app.make('bcrypt');
 
 module.exports = class LoginController {
@@ -24,7 +24,7 @@ module.exports = class LoginController {
             return { errors: e }
         }
 
-        let user = await User.where({email: data.email}).first();
+        let user = await User.query().findOne({email: data.email});
 
         if (!user) {
             response.status(400)
@@ -33,7 +33,7 @@ module.exports = class LoginController {
             }
         }
 
-        if (!bcrypt.compareSync(data.password, user.attributes.password)) {
+        if (!await user.verifyPassword(data.password)) {
             response.status(400)
             return {
                 message: 'Failed to login, bad password!'

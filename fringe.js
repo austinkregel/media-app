@@ -1,10 +1,24 @@
 let Application = require('forge-cli');
-let knexfile = require('./knexfile')
-const knex = require('knex')(knexfile);
-const bookshelf = require('bookshelf')(knex);
-bookshelf.plugin(require('bookshelf-eloquent'));
+require('dotenv').config()
+require('fringejs');
+app.closeActions = [];
 
-app.shelf = bookshelf
+require('./bootstrap/helpers');
+
+const Config = app.make('Config');
+
+/*-----------------------------------------------------------------
+ * Generally we're going to configure our own config directory
+ * since we can change where we want to put the config directory.
+ *-----------------------------------------------------------------
+ */
+app.config = Config.register(app.base_path('/config'));
+
+require('./bootstrap/bootstrap')
+
+app.close = () => {
+    app.closeActions.map(closure => closure());
+}
 
 Application.register(__dirname, [
     // You can register either a whole directory or a single command, or both!
@@ -13,4 +27,8 @@ Application.register(__dirname, [
 
 let args = Object.assign({}, { args: process.argv });
 // This "starts" the application
-Application.start(args);
+
+Application.start(args) 
+.then(r => {
+   console.log('Closing'); app.close()
+})

@@ -31,6 +31,7 @@ app.fs =  {
     file_not_exists: (path) => !app.make('fs').existsSync(path),
     file_get_contents: (path) => app.make('fs').readFileSync(path, 'UTF-8')
 }
+app.require = (path) => require(app.base_path(path));
 
 app.wants_json = (req) => {
     let acceptJson = req.headers.accept === 'application/json' || false;

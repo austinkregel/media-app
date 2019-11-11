@@ -16,6 +16,13 @@ module.exports = class File extends Model {
             'extra',
             'created_at',
             'updated_at',
+            'normalized_name',
+            'rating',
+            'genre',
+            'plot',
+            'poster',
+            'imdbRating',
+            'runtime'
         ]
     }
 }

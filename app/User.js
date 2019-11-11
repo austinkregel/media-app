@@ -1,26 +1,13 @@
 const Model = require('./Model')
 const bcrypt = app.make('bcrypt')
+const Password = require('objection-password')();
 
-module.exports = class User extends Model {
+module.exports = class User extends Password(Model) {
     fillable() {
         return [
             'name',
             'email',
             'password',
         ]
-    }
-
-    constructor(...args) {
-        super(...args)
-
-        this.on('saving', async (userInstance) => {
-            let changed = Object.assign({}, userInstance.changed);
-
-            if (changed.password) {
-                userInstance.changed.password = bcrypt.hashSync(changed.password,  10)
-                userInstance.attributes.password = userInstance.changed.password
-            }
-            console.log({changed})
-        })
     }
 }

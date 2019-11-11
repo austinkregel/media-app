@@ -6,10 +6,10 @@
 const { validateAll } = require('indicative')
 
 const knex = require('knex')(app.config.database[app.config.database.connection]);
-const bookshelf = require('bookshelf')(knex);
-bookshelf.plugin(require('bookshelf-eloquent'));
+const { Model } = require('objection');
 
-app.shelf = bookshelf
+Model.knex(knex);
+app.Model = Model;
 
 app.closeActions.push(function() {
     knex.destroy()

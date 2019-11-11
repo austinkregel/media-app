@@ -6,5 +6,5 @@ mix.setPublicPath('public')
     .sass('resources/sass/app.scss', 'public/css')
     .options({
         processCssUrls: false,
-        postCss: [ tailwind('./tailwind.js') ],
+        postCss: [ tailwind('./tailwind.config.js') ],
     });
