@@ -4,135 +4,181 @@ const mime = require('mime-types');
 const path = require('path');
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
-const ora = require('ora')
 const dayjs = require('dayjs');
-const isMedia = filePath => in_array(mime.lookup(filePath), ['video/x-m4v', 'video/x-matroska', 'video/mpeg4-generic', 'video/mp4', 'video/x-flv', 'video/h265', 'video/h264', 'video/vp8', 'audio/mp3', 'audio/mpeg', 'audio/x-aac', 'audio/aac', 'audio/x-flac', 'audio/ac3',])
-const md5File = require('md5-file/promise')
+const { basename } = require('path');
+const isMedia = (filePath) =>
+	in_array(mime.lookup(filePath), [
+		'video/x-m4v',
+		'video/x-matroska',
+		'video/mpeg4-generic',
+		'video/mp4',
+		'video/x-flv',
+		'video/h265',
+		'video/h264',
+		'video/vp8',
+		'audio/mp3',
+		'audio/mpeg',
+		'audio/x-aac',
+		'audio/aac',
+		'audio/x-flac',
+		'audio/ac3'
+	]);
+const md5File = require('md5-file/promise');
 const torrentName = require('torrent-name-parser');
-const axios = require('axios');
+const MediaLookupService = require('../Services/MediaLookupService');
+const mediaService = new MediaLookupService();
+const Media = app.require('app/Media');
 
-var crypto = require("crypto");
-var stream = require("stream");
 function iterate(dir) {
-    return fs.readdirAsync(dir).map(function (file) {
-        file = path.resolve(dir, file);
-        return fs.statAsync(file).then(async function (stat) {
-            if (stat.isDirectory()) {
-                return await iterate(file);
-            } else {
-                return file;
-            }
-        })
-    }).then(function (results) {
-        // flatten the array of arrays
-        return Array.prototype.concat.apply([], results);
-    }).catch(e => []);
+	return fs
+		.readdirAsync(dir)
+		.map(function(file) {
+			file = path.resolve(dir, file);
+			return fs.statAsync(file).then(async function(stat) {
+				if (stat.isDirectory()) {
+					return await iterate(file);
+				} else {
+					return file;
+				}
+			});
+		})
+		.then(function(results) {
+			// flatten the array of arrays
+			return Array.prototype.concat.apply([], results);
+		})
+		.catch((e) => []);
 }
-const in_array = (needle, haystack) => haystack.includes(needle)
+const in_array = (needle, haystack) => haystack.includes(needle);
+const torrentNameFix = (fileName) =>
+	(torrentName(app.searchify(fileName)).title || '')
+		.replace(/^[\d]{1,5}\./, '')
+		.replace(/\./g, ' ')
+		.replace(/mp3$/, '')
+		.split(' ')
+		.filter((i) => i.trim())
+		.join(' ')
+		.trim();
+module.exports = class Index extends Command {
+	constructor(context) {
+		super(context);
+		this.signature = 'index {directory}';
+	}
 
-module.exports = class Theory extends Command {
-    constructor(context) {
-        super(context);
-        this.signature = 'index {directory}';
-    }
+	async handle() {
+		Bus.clients((socket) => socket.emit('command:index', 0));
+		let location = this.argument('directory').startsWith('/')
+			? this.argument('directory')
+			: path.join(process.cwd(), this.argument('directory'));
 
-    async handle() {
-        let location = this.argument('directory').startsWith('/') ? this.argument('directory') : path.join(process.cwd(), this.argument('directory'));
-    
-        let message = 'Locating files in [' + location + ']: ';
-        let spinner = ora(message).start();
-        const time = dayjs();
+		let files = (await iterate(location)) || [];
+		files = files.filter(isMedia);
 
-        console.log(message);
-        console.log('')
-        
-        let interval = setInterval(() => {
-            spinner.text = message + dayjs().diff(time, 'seconds') + 's...'
-        }, 100)
-        let files = await iterate(location) || []
-        files = files.filter(isMedia)
-        spinner.succeed();
+		let cache = [];
+		let i = 0;
+		for (let index in files) {
+			console.log((Object.keys(files).length > 0 ? i / Object.keys(files).length : 0) * 100 + '%');
+			Bus.clients((socket) =>
+				socket.emit('command:index', Object.keys(files).length > 0 ? i / Object.keys(files).length : 0)
+			);
+			i++;
+			let file = files[index];
+			let hash = await md5File(file);
+			let fileRecord = await File.query().findOne({ hash: hash });
 
-        let cache = [];
-        clearInterval(interval);
-        for (let index in files) {   
-            let file = files[index]
-            // let spinner = ora('Calculating the hash for [' + file + ']').start();
-            let hash = await md5File(file);
-            spinner.text = 'Getting file stats...'
+			const mediaName = torrentNameFix(basename(file));
 
-            let info = await fs.statSync(file);
-            // spinner.text = 'Finding if there are any existing...';
-            
-            let file_ = await File.query().findOne({'hash': hash});
+			// #region Update the media record. At the end of the region you'll be abble to use the mediaFile variable.
+			if (!cache[mediaName]) {
+				let media = await mediaService.lookup(mediaName);
+				if (!media) {
+					console.log('Failed to find a record for', {
+						mediaName,
+						fileRecord
+					});
+					continue;
+				}
+				// Just get the first item...
+				cache[mediaName] = media;
+			}
 
+			let {
+				name,
+				rank,
+				poster,
+				backdrop,
+				plot,
+				type,
+				runtime,
+				popularity,
+				revenue,
+				tagline,
+				release_date,
+				genres
+			} = cache[mediaName];
 
-            if (file_) {
-                if (file_.normalized_name) {
-                    continue;
-                }
-                try {
-                    const torrentNameFix = fileName => (torrentName(fileName).title || '').replace(/^[\d]{1,5}\./, '').replace(/\./g, ' ').replace(/mp3$/, '').trim()
-                    const mediaName = torrentNameFix(file_.name)
-                    
+			let mediaFile = await Media.query().where('name', '=', name);
 
-                    if (!cache[mediaName]) {
-                        let { data: media } = await axios.get('http://www.omdbapi.com/?apikey=' + process.env.OMD_API_KEY + '&t=' + mediaName)
-                        cache[mediaName] = media;
-                    }
-                    let media = cache[mediaName];
+			if (mediaFile.length === 0) {
+				mediaFile = await Media.query().insertAndFetch({
+					name,
+					rating: rank,
+					poster,
+					backdrop,
+					plot,
+					runtime,
+					popularity,
+					revenue,
+					tagline,
+					release_date
+				});
+			} else {
+				mediaFile = mediaFile[0];
+			}
 
-                    file_.update({
-                        normalized_name: media.Title,
-                        rating: media.Rated,
-                        genre: media.genre,
-                        plot: media.Genre,
-                        poster: media.Poster,
-                        imdbRating: media.imdbRating,
-                        runtime: media.Runtime,
-                    })                
-                } catch (e) {
-                    console.error(e)
-                }
+			await mediaFile.update({
+				name,
+				rating: rank,
+				poster,
+				backdrop,
+				plot,
+				runtime,
+				popularity,
+				revenue,
+				tagline,
+				release_date
+			});
 
-                if (file_ !== null) {
-                    // spinner.text = ('We found a duplicate file [' + file + '] [' + file_.attributes.hash + ']')
-                    // spinner.fail()
-                    continue;
-                }
-            } else {
-                let name = path.basename(file);
-                const torrentNameFix = fileName => (torrentName(fileName).title || '').replace(/^[\d]{1,5}\./, '').replace(/\./g, ' ').replace(/mp3$/, '').trim()
-                const mediaName = torrentNameFix(name)
-                if (!cache[mediaName]) {
-                    let { data: media } = await axios.get('http://www.omdbapi.com/?apikey=' + process.env.OMD_API_KEY + '&t=' + mediaName)
-                    cache[mediaName] = media;
-                }
-                let media = cache[mediaName];
-                // spinner.succeed('Unique file found ' + file)
-                await File.create({
-                    name,
-                    mime_type: mime.lookup(file),
-                    file_path: file,
-                    should_convert: mime.lookup(file) !== 'video/mp4',
-                    converted_at: null,
-                    size: info.size * 0.00000095367432,
-                    bytes: info.size,
-                    hash,
-                    type: null,
-                    extra: null,
-                    created_at: dayjs(info.birthtime).format('YYYY-MM-DD HH:ss:mm'),
-                    updated_at: dayjs(info.utime).format('YYYY-MM-DD HH:ss:mm'),
-                    normalized_name: media.Title,
-                    rating: media.Rated,
-                    genre: media.genre,
-                    plot: media.Genre,
-                    poster: media.Poster,
-                    imdbRating: media.imdbRating,
-                    runtime: media.Runtime,
+			await mediaFile.$relatedQuery('genres').unrelate();
 
-                })
-            }
-        }
-    }
-}
+			await Promise.all(genres.map(async (genre) => await mediaFile.$relatedQuery('genres').relate(genre.id)));
+			// #endregion
+
+			if (!fileRecord) {
+				const info = fs.lstatSync(file);
+				fileRecord = await File.create({
+					name,
+					mime_type: mime.lookup(file),
+					file_path: file,
+					should_convert: mime.lookup(file) !== 'video/mp4',
+					converted_at: null,
+					size: info.size * 0.00000095367432,
+					bytes: info.size,
+					hash,
+					type,
+					extra: null,
+					media_id: mediaFile.id,
+					created_at: dayjs(info.birthtime).format('YYYY-MM-DD HH:ss:mm'),
+					updated_at: dayjs(info.utime).format('YYYY-MM-DD HH:ss:mm')
+				});
+
+				fileRecord.$relatedQuery('media').relate(mediaFile.id);
+			} else {
+				fileRecord.update({
+					media_id: mediaFile.id
+				});
+			}
+		}
+
+		app.close();
+	}
+};

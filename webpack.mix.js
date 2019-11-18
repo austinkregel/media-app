@@ -7,4 +7,7 @@ mix.setPublicPath('public')
     .options({
         processCssUrls: false,
         postCss: [ tailwind('./tailwind.config.js') ],
+        hmrOptions: {
+            host: '192.168.1.105'
+        }
     });

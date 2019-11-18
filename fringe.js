@@ -29,6 +29,3 @@ let args = Object.assign({}, { args: process.argv });
 // This "starts" the application
 
 Application.start(args) 
-.then(r => {
-   console.log('Closing'); app.close()
-})

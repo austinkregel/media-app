@@ -17,11 +17,13 @@ module.exports = class RouteServiceProvider {
     register() {
         this.registerMiddleware()
         Router.express.use(require('express').static('public'))
+        var server = require('http').Server(Router.express);
+        app.io = require('socket.io')(server);
 
         require(app.base_path('/routes/web'))(Router)
-        require(app.base_path('/routes/api'))(Router)
-
-        app.server = Router.express.listen(PORT, () => console.log('Listening on ' + PORT))
+        require(app.base_path('/routes/broadcast'))
+        
+        app.server = server.listen(PORT, () => console.log('Listening on ' + PORT))
 
         app.routes = Router.router.routes;
 

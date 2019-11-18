@@ -7,13 +7,20 @@ const { validateAll } = require('indicative')
 
 const knex = require('knex')(app.config.database[app.config.database.connection]);
 const { Model } = require('objection');
+const events = require("events");
+const Bus = new events.EventEmitter();
 
 Model.knex(knex);
 app.Model = Model;
+app.knex = knex;
 
-app.closeActions.push(function() {
+app.closeActions.push(function () {
     knex.destroy()
 })
+
+global.Bus = Bus;
+Bus.sockets = {};
+Bus.clients = closure => Object.values(Bus.sockets).map(closure);
 
 knex.schema.hasTable('users').catch(e => {
     if (e.code === "ER_ACCESS_DENIED_ERROR") {

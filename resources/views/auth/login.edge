@@ -1,39 +1,39 @@
 @layout('layouts.app')
 
 @section('content')
-    <div class="container mx-auto">
-        <div class="flex flex-wrap">
-            <div class="w-full md:w-3/4 mx-auto">
-                <div class="bg-white shadow rounded-lg ">
-                    <div class="text-3xl py-2 px-4 rounded-t border border-greys bg-grey-lightest">Login</div>
-
-                    <div class="py-2 px-4">
-                        <form method="POST" action="/login">
-                            <input type="hidden" name="_csrf" value="{{ csrf }}">
-                            <!-- E-Mail Address -->
-                            <div class="mb-4">
-                                <label class="block text-grey-darker text-sm font-bold mb-2">E-Mail Address</label>
-
-                                <input type="email" class="appearance-none block w-full bg-grey-lightest text-grey-darker border border-grey-lighter rounded py-3 px-4" name="email">
-                            </div>
-
-                            <!-- Password -->
-                            <div class="mb-4">
-                                <label class="block text-grey-darker text-sm font-bold mb-2">Password</label>
-
-                                <input type="password" class="appearance-none block w-full bg-grey-lightest text-grey-darker border border-grey-lighter rounded py-3 px-4" name="password">
-                            </div>
-
-                            <!-- Terms And Conditions -->
-                            <div class="flex flex-wrap">
-                                <button class="w-full inline-block text-sm px-4 py-2 leading-none rounded mt-4 mb-4 lg:mt-0 border border-grey text-black hover:border-blue hover:bg-blue hover:text-white" type="submit">
-                                    <i class="fa fa-btn fa-check-circle"></i> Login
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+<div class="w-full flex flex-col items-center align-middle h-full my-4 md:my-32">
+    <form action="/login" class="max-w-xs w-full bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex-none justify-center" method="post">
+        <input type="hidden" name="_csrf" value="{{ csrf }}"/>
+        <div class="font-bold text-xl text-indigo-500 font-ubuntu flex flex-col mx-auto items-center">
+            <zondicon icon="mobile-devices" class="w-16 h-16 fill-current text-indigo-500"></zondicon>
+            <div class="mt-4 text-2xl">
+                Fullscreen
             </div>
         </div>
-    </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                Email
+            </label>
+            <input class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="text" placeholder="austin@fullscreen.tv" name="email">
+        </div>
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+            Password
+            </label>
+            <input class="appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************" name="password">
+        </div>
+        <div class="flex items-center justify-between">
+           <a class="inline-block align-baseline font-bold text-sm text-indigo-500 hover:text-indigo-800" href="#">
+                Forgot Password?
+            </a>
+            <button class="border border-indigo-500 hover:bg-indigo-700 text-indigo-500 hover:text-white font-bold py-1 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                Sign In
+            </button>
+        </div>
+    </form>
+    <p class="text-center text-gray-500 text-xs">
+        &copy;2019 Metabit. co All rights reserved.
+    </p>
+</div>
+
 @endsection
