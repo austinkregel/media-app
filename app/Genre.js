@@ -30,6 +30,15 @@ module.exports = class Genre extends Model {
 						to: 'media_genres.media_id'
 					},
 					to: 'medias.id'
+				},
+
+				files: {
+					relation: app.Model.HasManyRelation,
+					modelClass: app.require('app/File'),
+					join: {
+						from: 'medias.id',
+						to: 'files.media_id'
+					}
 				}
 			}
 		};

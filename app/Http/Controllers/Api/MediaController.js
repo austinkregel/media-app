@@ -4,12 +4,19 @@ var Transcoder = require('stream-transcoder');
 module.exports = class MediaController {
 	async show(req, res) {
 		const File = app.require('app/File');
-		const fileRecord = await File.query().findById(req.params.id);
+		const fileRecord = await File.query().where('id', '=', req.params.id).orWhere('hash', '=', req.params.id);
 
-		var file = fileRecord.file_path;
+		if (!fileRecord || !fileRecord[0]) {
+			req.status(404);
+			return {
+				message: ' Nothing found'
+			};
+		}
+
+		var file = fileRecord[0].file_path;
+
 		var stat = fs.statSync(file);
 		var total = stat.size;
-
 		if (req.headers['range']) {
 			var range = req.headers.range;
 			var parts = range.replace(/bytes=/, '').split('-');

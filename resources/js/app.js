@@ -8,6 +8,8 @@ import torrentName from 'torrent-name-parser';
 import io from 'socket.io-client';
 import Vuex from 'vuex';
 import video from 'video.js';
+import 'videojs-chromecast';
+import 'videojs-overlay';
 
 Vue.use(Vuex);
 window.socket = io(window.location.origin);
@@ -34,6 +36,7 @@ let torrentNameFix = (fileName) =>
 		.split(' ')
 		.filter((item) => item)
 		.join(' ');
+
 window.torrentNameFix = (fileName) =>
 	Object.assign(torrentName(fileName), {
 		title: torrentNameFix(fileName)
@@ -51,7 +54,7 @@ const router = new VueRouter({
 });
 
 const state = require('./state').default;
-console.log(state);
+
 const store = new Vuex.Store(state);
 
 const app = new Vue({

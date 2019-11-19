@@ -7,7 +7,7 @@ module.exports = class GenresController {
 		let limit = req.query.limit ? req.query.limit : 15;
 		const offset = (page - 1) * limit;
 
-		let results = await Genre.query().eager('medias.files').range(page * limit - limit, limit * page);
+		let results = await Genre.query().eager('[medias.[genres, files]]').range(page * limit - limit, limit * page);
 
 		return {
 			total: results.total,

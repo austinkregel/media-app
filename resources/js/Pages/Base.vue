@@ -60,7 +60,7 @@ export default {
             } else {
                 const {
                     data: { data }
-                } = await axios.get("/api/files");
+                } = await axios.get("/api/files?limit=100000");
                 this.$store.commit("setFiles", { files: data });
             }
             this.$forceUpdate();

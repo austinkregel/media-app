@@ -1,7 +1,8 @@
 export default {
 	state: {
 		files: [],
-		genres: []
+		genres: [],
+		media: null
 	},
 	mutations: {
 		setFiles(state, { files }) {
@@ -10,6 +11,10 @@ export default {
 
 		setGenres(state, { genres }) {
 			state.genres = genres;
+		},
+
+		setMedia(state, { media }) {
+			state.media = media;
 		}
 	},
 	getters: {
@@ -18,6 +23,9 @@ export default {
 		},
 		genres(state, getters) {
 			return state.genres;
+		},
+		media(state, getters) {
+			return state.media;
 		}
 	}
 };

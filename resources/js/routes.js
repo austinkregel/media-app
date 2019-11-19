@@ -3,6 +3,7 @@ import Player from './Pages/Player';
 import Home from './Pages/Home';
 import Watch from './Pages/Watch';
 import Search from './Pages/Search';
+import Library from './Pages/Library';
 
 export default [
 	{
@@ -19,7 +20,7 @@ export default [
 			},
 			{
 				path: 'library',
-				component: Home
+				component: Library
 			},
 			{
 				path: 'search',
