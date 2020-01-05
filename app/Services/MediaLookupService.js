@@ -15,8 +15,6 @@ module.exports = class MediaLookupService {
             }
         )
         this.movieDbImageUrl = 'https://image.tmdb.org/t/p/w500';
-        this.getGenres();
-        console.log('Getting genres')
     }
 
     async getGenres() {

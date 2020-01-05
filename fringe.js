@@ -19,6 +19,9 @@ require('./bootstrap/bootstrap')
 app.close = () => {
     app.closeActions.map(closure => closure());
 }
+app.register(app.config.app.providers.filter(provider => ![
+    app.base_path('app/Providers/RouteServiceProvider.js')
+].includes(provider)));
 
 Application.register(__dirname, [
     // You can register either a whole directory or a single command, or both!

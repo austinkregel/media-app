@@ -19,6 +19,29 @@ module.exports = (router) => {
 	router.express.get('/api/media/:id', app.controller('Api/MediaController', 'show'));
 	router.get('/api/search/:query', app.controller('Api/FileController', 'search'));
 
+	router.express.get('/broadcasting/auth', (req, res) => {
+		var query = req.query;
+		var socketId = query.socket_id;
+		var channel = query.channel_name;
+		var callback = query.callback;
+
+		var presenceData = {
+			user_id: 'some_id',
+			user_info: {
+				name: 'John Smith'
+			}
+		};
+
+		var auth = JSON.stringify(Bus.pusher.authenticate(socketId, channel, presenceData));
+		var cb = callback.replace(/\"/g, '') + '(' + auth + ');';
+
+		res.set({
+			'Content-Type': 'application/javascript'
+		});
+
+		res.send(cb);
+	});
+
 	router.get({
 		path: '/:route?/:id?',
 		middleware: app.make('middleware.auth'),

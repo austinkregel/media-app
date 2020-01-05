@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config();
 require('fringejs');
 
 require('./bootstrap/helpers');
@@ -12,4 +12,4 @@ const Config = app.make('Config');
  */
 app.config = Config.register(app.base_path('/config'));
 
-module.exports = app.config.database[app.config.database.connection]
+module.exports = app.config.database[app.config.database.connection];

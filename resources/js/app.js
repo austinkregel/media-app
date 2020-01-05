@@ -5,15 +5,15 @@ import Zondicon from 'vue-zondicons';
 import routes from './routes';
 import jQuery from 'jquery';
 import torrentName from 'torrent-name-parser';
-import io from 'socket.io-client';
 import Vuex from 'vuex';
 import video from 'video.js';
 import 'videojs-chromecast';
 import 'videojs-overlay';
+import io from 'socket.io-client';
 
 Vue.use(Vuex);
-window.socket = io(window.location.origin);
-
+window.socket = io('http://192.168.1.105:3000/');
+socket.on('refresh', () => console.log('refreshed.'));
 window.$ = window.jQuery = jQuery;
 window.Bus = new Vue();
 window.axios = axios;

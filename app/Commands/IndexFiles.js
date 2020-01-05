@@ -65,7 +65,12 @@ module.exports = class Index extends Command {
 	}
 
 	async handle() {
-		Bus.clients((socket) => socket.emit('command:index', 0));
+		Bus.clients((socket) => {
+			console.log('starting...');
+			socket.emit('command:index', 1);
+		});
+		console.log('starting...');
+
 		let location = this.argument('directory').startsWith('/')
 			? this.argument('directory')
 			: path.join(process.cwd(), this.argument('directory'));
@@ -76,50 +81,85 @@ module.exports = class Index extends Command {
 		let cache = [];
 		let i = 0;
 		for (let index in files) {
-			console.log((Object.keys(files).length > 0 ? i / Object.keys(files).length : 0) * 100 + '%');
-			Bus.clients((socket) =>
-				socket.emit('command:index', Object.keys(files).length > 0 ? i / Object.keys(files).length : 0)
-			);
+			const rawPercent = (Object.keys(files).length > 0 ? i / Object.keys(files).length : 0) * 100;
+			Bus.clients((socket) => {
+				console.log('Indexing... ' + rawPercent.toFixed(2));
+				socket.emit('command:index', rawPercent.toFixed(2));
+			});
+
 			i++;
 			let file = files[index];
 			let hash = await md5File(file);
 			let fileRecord = await File.query().findOne({ hash: hash });
 
+			if (!fileRecord) {
+				const info = fs.lstatSync(file);
+				fileRecord = await File.create({
+					name: path.basename(file),
+					mime_type: mime.lookup(file),
+					file_path: file,
+					should_convert: mime.lookup(file) !== 'video/mp4',
+					converted_at: null,
+					size: info.size * 0.00000095367432,
+					bytes: info.size,
+					hash,
+					type: null,
+					extra: null,
+					created_at: dayjs(info.birthtime).format('YYYY-MM-DD HH:ss:mm'),
+					updated_at: dayjs(info.utime).format('YYYY-MM-DD HH:ss:mm')
+				});
+			}
 			const mediaName = torrentNameFix(basename(file));
 
-			// #region Update the media record. At the end of the region you'll be abble to use the mediaFile variable.
-			if (!cache[mediaName]) {
-				let media = await mediaService.lookup(mediaName);
-				if (!media) {
-					console.log('Failed to find a record for', {
-						mediaName,
-						fileRecord
-					});
-					continue;
+			try {
+				// #region Update the media record. At the end of the region you'll be abble to use the mediaFile variable.
+				if (!cache[mediaName]) {
+					let media = await mediaService.lookup(mediaName);
+					if (!media) {
+						console.log('Failed to find a record for', {
+							mediaName
+						});
+						continue;
+					}
+					// Just get the first item...
+					cache[mediaName] = media;
 				}
-				// Just get the first item...
-				cache[mediaName] = media;
-			}
 
-			let {
-				name,
-				rank,
-				poster,
-				backdrop,
-				plot,
-				type,
-				runtime,
-				popularity,
-				revenue,
-				tagline,
-				release_date,
-				genres
-			} = cache[mediaName];
+				let {
+					name,
+					rank,
+					poster,
+					backdrop,
+					plot,
+					type,
+					runtime,
+					popularity,
+					revenue,
+					tagline,
+					release_date,
+					genres
+				} = cache[mediaName];
 
-			let mediaFile = await Media.query().where('name', '=', name);
+				let mediaFile = await Media.query().where('name', '=', name);
 
-			if (mediaFile.length === 0) {
-				mediaFile = await Media.query().insertAndFetch({
+				if (mediaFile.length === 0) {
+					mediaFile = await Media.query().insertAndFetch({
+						name,
+						rating: rank,
+						poster,
+						backdrop,
+						plot,
+						runtime,
+						popularity,
+						revenue,
+						tagline,
+						release_date
+					});
+				} else {
+					mediaFile = mediaFile[0];
+				}
+
+				await mediaFile.update({
 					name,
 					rating: rank,
 					poster,
@@ -131,54 +171,27 @@ module.exports = class Index extends Command {
 					tagline,
 					release_date
 				});
-			} else {
-				mediaFile = mediaFile[0];
-			}
 
-			await mediaFile.update({
-				name,
-				rating: rank,
-				poster,
-				backdrop,
-				plot,
-				runtime,
-				popularity,
-				revenue,
-				tagline,
-				release_date
-			});
-
-			await mediaFile.$relatedQuery('genres').unrelate();
-
-			await Promise.all(genres.map(async (genre) => await mediaFile.$relatedQuery('genres').relate(genre.id)));
-			// #endregion
-
-			if (!fileRecord) {
-				const info = fs.lstatSync(file);
-				fileRecord = await File.create({
-					name,
-					mime_type: mime.lookup(file),
-					file_path: file,
-					should_convert: mime.lookup(file) !== 'video/mp4',
-					converted_at: null,
-					size: info.size * 0.00000095367432,
-					bytes: info.size,
-					hash,
-					type,
-					extra: null,
-					media_id: mediaFile.id,
-					created_at: dayjs(info.birthtime).format('YYYY-MM-DD HH:ss:mm'),
-					updated_at: dayjs(info.utime).format('YYYY-MM-DD HH:ss:mm')
-				});
-
-				fileRecord.$relatedQuery('media').relate(mediaFile.id);
-			} else {
 				fileRecord.update({
+					name,
+					type,
 					media_id: mediaFile.id
 				});
+
+				await mediaFile.$relatedQuery('genres').unrelate();
+
+				await Promise.all(
+					genres.map(async (genre) => await mediaFile.$relatedQuery('genres').relate(genre.id))
+				);
+				// #endregion
+			} catch (e) {
+				console.error('Encountered sevre error:', e);
 			}
 		}
-
+		Bus.clients((socket) => {
+			console.log('Finished!');
+			socket.emit('command:index', 100);
+		});
 		app.close();
 	}
 };

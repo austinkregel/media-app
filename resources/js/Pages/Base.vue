@@ -1,9 +1,20 @@
+<style>
+.navbar {
+    width: 300px;
+}
+
+@media only screen and (max-width: 600px) {
+    .navbar {
+        width: 100%;
+    }
+}
+</style>
 <template>
     <div class="flex w-full">
-        <div class="w-full bg-indigo-600" style="max-width: 300px;">
+        <div class="bg-indigo-600 navbar">
             <div class="antialiased min-h-screen p-8">
-                <div class="flex justify-center">
-                    <nav id="nav" class="w-56 relative">
+                <div class="flex justify-center h-full">
+                    <nav id="nav" class="w-56 relative h-full">
                         <router-link to="/dashboard" class="mb-8 block flex items-center">
                             <div
                                 class="font-bold text-xl text-white font-ubuntu flex flex-col mx-auto items-center"
@@ -25,13 +36,17 @@
                             <item name="Discover" link="/discover" icon="hot" />
                             <item name="Library" link="/library" icon="library" />
                             <item name="Settings" link="/settings" icon="wrench" />
-                            <li v-if="indexing">
-                                <zondicon
-                                    icon="radar"
-                                    class="fill-current text-green-dark w-16 h-16 rotate mx-auto"
-                                ></zondicon>
-                            </li>
                         </ul>
+                        <div
+                            v-if="indexing !== null"
+                            class="w-full mb-6 flex items-center fixed bottom-0"
+                        >
+                            <zondicon
+                                icon="radar"
+                                class="fill-current text-indigo-400 w-5 h-5 rotate"
+                            ></zondicon>
+                            <span class="pl-4 text-indigo-200">{{ indexing }}% complete...</span>
+                        </div>
                     </nav>
                 </div>
             </div>
@@ -48,12 +63,19 @@ export default {
     data: () => ({
         activeClasses: "border-l-4 border-teal-500",
         selectedIndex: 0,
-        indexing: 0
+        indexing: null
     }),
+    watch: {
+        indexing(newVal, oldVal) {
+            console.log({ newVal, oldVal });
+        }
+    },
     mounted() {
-        socket.on("command:index", value => {
+        socket.on("command.index", value => {
             this.indexing = value;
         });
+
+        Bus.$off("refresh:list");
         Bus.$on("refresh:list", async () => {
             if (this.$route.query.q) {
                 Bus.$emit("search");
@@ -67,6 +89,7 @@ export default {
         });
         Bus.$emit("refresh:list");
 
+        Bus.$off("refresh:genres");
         Bus.$on("refresh:genres", async () => {
             if (this.$route.query.q) {
                 Bus.$emit("search");

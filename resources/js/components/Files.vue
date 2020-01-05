@@ -3,6 +3,7 @@
         <div v-for="(files, $i) in chunk" class="flex flex-wrap overflow-hidden">
             <media
                 v-for="file in files"
+                :key="file.id"
                 :activation-key="activationKey"
                 :class="width"
                 :file="file"
