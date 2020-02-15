@@ -15,6 +15,10 @@ export default [
 				component: Home
 			},
 			{
+				path: 'poc',
+				component: Home
+			},
+			{
 				path: 'discover',
 				component: Home
 			},

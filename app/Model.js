@@ -40,7 +40,7 @@ module.exports = class BookshelfModel extends app.Model {
     }
 
     static create(data) {
-        return promiseMe(() => this.query().insert(fillableData(data)))
+        return this.query().insert(fillableData(data))
     }
 
     async update(data) {

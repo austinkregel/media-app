@@ -10,6 +10,7 @@ module.exports = (router) => {
 	router.get('/register', app.controller('Auth/RegisterController', 'create'), middlewareWithAuthenticatedRedirect);
 	router.post('/register', app.controller('Auth/RegisterController', 'store'), middlewareWithAuthenticatedRedirect);
 
+	router.post('/api/job', app.controller('JobController', 'store'));
 	router.get('/api/genres', app.controller('Api/GenresController', 'index'));
 	router.get('/api/files', app.controller('Api/FileController', 'index'));
 	router.get('/api/file/:id', app.controller('Api/FileController', 'showFiles'));

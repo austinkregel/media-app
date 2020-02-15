@@ -2,7 +2,6 @@ let Application = require('forge-cli');
 require('dotenv').config()
 require('fringejs');
 app.closeActions = [];
-
 require('./bootstrap/helpers');
 
 const Config = app.make('Config');
@@ -15,13 +14,17 @@ const Config = app.make('Config');
 app.config = Config.register(app.base_path('/config'));
 
 require('./bootstrap/bootstrap')
+const Queue = app.require('bootstrap/Queue')
+
+const queue = new Queue;
+app.queue = queue;
 
 app.close = () => {
     app.closeActions.map(closure => closure());
 }
-app.register(app.config.app.providers.filter(provider => ![
-    app.base_path('app/Providers/RouteServiceProvider.js')
-].includes(provider)));
+// app.register(app.config.app.providers.filter(provider => ![
+//     app.base_path('app/Providers/RouteServiceProvider.js')
+// ].includes(provider)));
 
 Application.register(__dirname, [
     // You can register either a whole directory or a single command, or both!

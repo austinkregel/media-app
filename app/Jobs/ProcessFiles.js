@@ -1,5 +1,5 @@
 module.exports = class ProcessFiles {
-    static getQueueName() {
+    static get getQueueName() {
         return 'process:file';
     }
 

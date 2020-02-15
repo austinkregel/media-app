@@ -16,7 +16,7 @@ module.exports = class QueueServiceProvider {
                 return false;
             }
 
-            return app.queue.register(job.getQueueName(), jobInstance.handle);
+            return app.queue.register(job.getQueueName, jobInstance.handle);
         }).filter(i => i));
 	}
 };

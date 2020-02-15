@@ -4,6 +4,7 @@ module.exports = {
     providers: [
         app.base_path('app/Providers/RouteServiceProvider.js'),
         app.base_path('app/Providers/QueueServiceProvider.js'),
+        app.base_path('app/Providers/EventServiceProvider.js'),
     ],
     name: 'Project'
 }

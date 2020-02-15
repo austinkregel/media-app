@@ -6,19 +6,19 @@ module.exports = class Queue {
     }
 
     dispatch(job, { priority = 'normal', ttl = 60000, delay = 400 } = {}) {
-        if (typeof job.constructor.getQueueName !== 'function') {
+        if (typeof job.constructor.getQueueName !== 'string') {
             throw new Error('You must defined a getQueueName method so the dispatcher knows where to put the job.');
         }
 
-        if (typeof this.queues[job.constructor.getQueueName()] === 'undefined') {
-            throw new Error('There is no queue ['+ job.getQueueName()+'], please register a job!')
+        if (typeof this.queues[job.constructor.getQueueName] === 'undefined') {
+            throw new Error('There is no queue ['+ job.getQueueName+'], please register a job!')
         }
 
         if (typeof job.toJson !== 'function') {
             throw new Error('You must define a toJson method so the dispatcher can put data into the queue.');
         }
 
-        this.queues[job.constructor.getQueueName()].add(job);
+        this.queues[job.constructor.getQueueName].add(job);
     }
 
     register(name, action) {

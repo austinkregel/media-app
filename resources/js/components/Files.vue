@@ -79,7 +79,7 @@ export default {
         calculatedWidth() {
             let widthOfMovie = 192;
             let width = Math.floor(
-                Math.floor(this.widthValue / widthOfMovie),
+                Math.floor(document.getElementById("container").offsetWidth / widthOfMovie),
                 6
             );
             return width;
@@ -142,7 +142,7 @@ export default {
             this.active = false;
         }
     },
-    async mounted() {
+    mounted() {
         Bus.$off(this.activationKey);
         Bus.$on(this.activationKey, file => {
             this.$store.commit("setFiles", { files: this.files });
@@ -154,15 +154,12 @@ export default {
             });
         });
 
+        const that = this;
+
         const resize = () => {
-            console.log(
-                "thing",
-                document.getElementById("container").offsetWidth
-            );
-            this.widthValue = document.getElementById("container").offsetWidth;
+            that.widthValue = document.getElementById("container").offsetWidth;
         };
 
-        resize.bind(this);
         window.onresize = resize;
     }
 };

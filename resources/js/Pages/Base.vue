@@ -43,7 +43,7 @@
                         >
                             <zondicon
                                 icon="radar"
-                                class="fill-current text-indigo-400 w-5 h-5 rotate"
+                                class="fill-current text-indigo-300 w-5 h-5 rotate"
                             ></zondicon>
                             <span class="pl-4 text-indigo-200">{{ indexing }}% complete...</span>
                         </div>
@@ -71,8 +71,8 @@ export default {
         }
     },
     mounted() {
-        socket.on("command.index", value => {
-            this.indexing = value;
+        socket.on("command:index", value => {
+            this.indexing = value*100;
         });
 
         Bus.$off("refresh:list");

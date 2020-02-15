@@ -7,7 +7,7 @@
 }
 </style>
 <template>
-    <div class="p-4">
+    <div class="p-4 min-w-52">
         <button
             @click="activate"
             class="block text-gray-700 p-0 text-sm overflow-hidden rounded-lg shadow hover:shadow-lg transition-all focus:outline-none relative"
@@ -16,7 +16,7 @@
                 <img
                     :src="file.poster"
                     :alt="file.name"
-                    class="h-64 mb-12p-0 m-0 overflow-hidden rounded-lg"
+                    class="h-64 mb-12 p-0 m-0 overflow-hidden rounded-lg"
                 />
                 <a
                     :href="'/watch/' + file.files[0].hash"

@@ -21,9 +21,16 @@ app.closeActions.push(function() {
 global.Bus = Bus;
 Bus.sockets = {};
 Bus.clients = (closure) => {
-	console.log('running ', Bus.sockets);
-	Object.values(Bus.sockets).map((socket) => closure(socket));
+	Object.keys(Bus.sockets).map((socket) => closure(Bus.sockets[socket]));
 };
+
+//app.event(new event)
+app.event = (eventInstance) => {
+	// This is an instance of `app/Events/Event`
+	const name = eventInstance.constructor.class;
+	Bus.emit(name, eventInstance);
+}
+
 
 knex.schema.hasTable('users').catch((e) => {
 	if (e.code === 'ER_ACCESS_DENIED_ERROR') {
