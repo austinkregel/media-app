@@ -24,7 +24,3 @@ If you discover a security vulnerability within Fringe, please send an e-mail to
 ## License
 The Fringe is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## Support on Beerpay
-Hey dude! Help me out for a couple of :beers:!
-
-[![Beerpay](https://beerpay.io/austinkregel/FringeJS/badge.svg?style=beer-square)](https://beerpay.io/austinkregel/FringeJS)  [![Beerpay](https://beerpay.io/austinkregel/FringeJS/make-wish.svg?style=flat-square)](https://beerpay.io/austinkregel/FringeJS?focus=wish)
